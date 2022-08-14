@@ -59,7 +59,7 @@ namespace TemplateFiller.Maui.ViewModels
 					FileTypes = new FilePickerFileType(
 						new Dictionary<DevicePlatform, IEnumerable<string>>
 						{
-							{DevicePlatform.WinUI, new[] { ".docx" } }
+							{ DevicePlatform.WinUI, new[] { ".docx" } }
 						})
 				};
 				var result = await FilePicker.Default.PickAsync(options);
@@ -85,34 +85,47 @@ namespace TemplateFiller.Maui.ViewModels
 			}
 		}
 
-		private async void ExecuteSaveFileCommand()
+		private async Task<string> SaveFile()
 		{
 			var docName = Header.Insert(Header.Length - 5,
 				$" {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}");
 			var fileName = Path.Combine(Path.GetDirectoryName(_fullPath), docName);
 			if (File.Exists(fileName))
 			{
-				await Application.Current.MainPage.DisplayAlert(
-					"Alert",
-					"File already exists.",
-					"OK");
+				throw new Exception("File already exists.");
 			}
 			else
 			{
 				_fileProcessor.Save(DataFields.ToList(), fileName);
+			}
+			return fileName;
+		}
+
+		private async void ExecuteSaveFileCommand()
+		{
+			try
+			{
+				var fileName = await SaveFile();
 				await Application.Current.MainPage.DisplayAlert(
-					"File saved",
-					$"File name: \"{docName}\"",
+						"File saved",
+						$"File name: \"{Path.GetFileName(fileName)}\"",
+						"OK");
+			}
+			catch (Exception e)
+			{
+				await Application.Current.MainPage.DisplayAlert(
+					"Alert",
+					e.Message,
 					"OK");
 			}
+
 		}
 
 		private async void ExecuteSendEmailCommand()
 		{
-			string fileName = Path.Combine(FileSystem.Current.AppDataDirectory, Header);
 			try
 			{
-				_fileProcessor.Save(DataFields.ToList(), fileName);
+				var fileName = await SaveFile();
 
 				await _emailSender.SendEmailAsync(fileName);
 			}
@@ -122,13 +135,6 @@ namespace TemplateFiller.Maui.ViewModels
 					"Alert",
 					e.Message,
 					"OK");
-			}
-			finally
-			{
-				if (File.Exists(fileName))
-				{
-					File.Delete(fileName);
-				}
 			}
 		}
 	}

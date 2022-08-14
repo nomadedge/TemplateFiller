@@ -13,14 +13,18 @@ namespace TemplateFiller.Core
 
         private Document _document;
 
+        public LocalFileProcessor()
+        {
+            _document = new Document();
+        }
 
         public void LoadFile(string fileName)
         {
             try
             {
-                _document = new Document(fileName);
+                _document.LoadFromFile(fileName);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new Exception("Error opening file.");
             }
