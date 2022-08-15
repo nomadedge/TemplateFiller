@@ -85,7 +85,7 @@ namespace TemplateFiller.Maui.ViewModels
 			}
 		}
 
-		private async Task<string> SaveFile()
+		private string SaveFile()
 		{
 			var docName = Header.Insert(Header.Length - 5,
 				$" {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd-HH-mm-ss")}");
@@ -105,7 +105,7 @@ namespace TemplateFiller.Maui.ViewModels
 		{
 			try
 			{
-				var fileName = await SaveFile();
+				var fileName = SaveFile();
 				await Application.Current.MainPage.DisplayAlert(
 						"File saved",
 						$"File name: \"{Path.GetFileName(fileName)}\"",
@@ -125,7 +125,7 @@ namespace TemplateFiller.Maui.ViewModels
 		{
 			try
 			{
-				var fileName = await SaveFile();
+				var fileName = SaveFile();
 
 				await _emailSender.SendEmailAsync(fileName);
 			}
